@@ -1,0 +1,70 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#f93dcanvas {
+    margin: 0;
+    padding:0;
+
+}
+
+.buttonDiv {
+    position: absolute;
+    top: 20px;
+    background-color: azure;
+    color: rgb(34, 34, 54);
+    padding: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.buttonDiv:hover {
+    background-color: aquamarine;
+}
+
+#nextDiv {
+    top: 20px;
+    left: 10%;
+}
+
+#saveDiv {
+    top: 20px;
+    left: 20%;
+}
+
+#dimDiv {
+    top: 20px;
+    left: 30%;
+}
+
+#refreashDataDiv {
+    top: 20px;
+    left: 40%;
+}
+
+#upDiv {
+    top: 20px;
+    left: 100px;
+    transform: translate(-50%, -50%);
+}
+
+#downDiv {
+    top: 80px;
+    left: 100px;
+    transform: translate(-50%, -50%);
+}
+
+#leftDiv {
+    top: 50px;
+    left: 40px;
+    transform: translate(-50%, -50%);
+}
+#rightDiv {
+    top: 50px;
+    left: 140px;
+    transform: translate(-50%, -50%);
+}

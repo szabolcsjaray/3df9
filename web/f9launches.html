@@ -1,0 +1,38 @@
+<!-- 1.10 -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>F9 launches</title>
+    <meta name="description" content="F9 launches 3d diagram">
+    <meta name="author" content="Szabolcs Járay">
+
+    <link rel="stylesheet" href="css/f9launches.css?v=1.05">
+    <script src="js/f9launches.js"></script>
+    <script src="js/launch.js"></script>
+    <script src="js/booster.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r122/three.min.js" /></script>
+    <script src="js/f9mountain.js"></script>
+    <script src="js/mountainsplit.js"></script>
+    <script src="js/boosterheight.js"></script>
+    <script src="js/rollingaverage.js"></script>
+    <script src="js/dataelement.js"></script>
+    <script src="js/masstoorbit.js"></script>
+    <script src="js/cadence.js"></script>
+</head>
+
+<body onload="init();">
+    <canvas width="3500" height="1800" id="canv" style="position:absolute;top:0px;left:0px;background-color: rgb(29, 29, 29);"></canvas>
+    <a id="link"></a>
+    <div id="nextDiv" class="buttonDiv" onclick="nextMode();">Next</div>
+    <div id="saveDiv" class="buttonDiv" onclick="saveClick();">Save</div>
+    <div id="dimDiv" class="buttonDiv" onclick="dimensionClick();">3D/2D</div>
+    <div id="refreashDataDiv" class="buttonDiv" onclick="refreshData();">Refresh data</div>
+
+    <div id="upDiv" class="buttonDiv" onclick="upButton();">UP</div>
+    <div id="downDiv" class="buttonDiv" onclick="downButton();">DOWN</div>
+    <div id="leftDiv" class="buttonDiv" onclick="leftButton();">LEFT</div>
+    <div id="rightDiv" class="buttonDiv" onclick="rightButton();">RIGHT</div>
+</body>
+</html>

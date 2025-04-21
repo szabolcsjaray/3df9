@@ -4,6 +4,9 @@ class Launch {
     constructor(id, num, date, boosters, launchSite, payload, payloadMass, orbit, partner, success, landingSuccess, description) {
         this.id = id;
         this.num = num;
+        if ((date.match(/ /g) || []).length > 3) {
+            date = date.substring(0, date.lastIndexOf(" "));
+        }
         this.dateStr = date;
         this.date = new Date(Date.parse(date));
         this.boosters = boosters;

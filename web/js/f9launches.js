@@ -4,6 +4,7 @@ var scrHeight;
 var c;
 var launches = [];
 var boosters = [];
+var landings = []; // landing objects array
 var baseX;
 var baseY;
 var step;
@@ -16,7 +17,7 @@ var allCol;
 var slCol;
 var diffCol;
 
-const MAX_LANDING = 26.0;
+const MAX_LANDING = 28.0;
 
 const LAUNCHES = 1;
 const REFURB = 2;
@@ -25,20 +26,25 @@ const AVERAGE = 4;
 const MASS_TO_ORBIT = 5;
 const CADENCE = 6;
 const BARCODE = 7;
-const LAST_MODE = 8;
+const LANDINGS = 8;
+const LC_USAGE = 9;
+const LAST_MODE = 10;
 
 var mode = LAUNCHES;
 
 const COLS = ["#02F3FF",  "#40f000", "#fffb00", "#ff1010",  "#9EFFFF",  "#ff009b", "#ffffff","#00ffab", "#fffb00","#ff3c00", "#00abff","#c340ff"]; 
+var ALPHA_COLS = {};
 //const COLS = ["#02F3FF",  "#40f000", "#fffb00", "#f00000",  "#9EFFFF",  "#ff009b", "#ffffff","#00ffab", "#fffb00","#ff3c00", "#00abff","#a300ff"]; 
 
-const MONTHS = ["January", "Febrzary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
 const F9_CGI_SCRIPT = "cgi-bin\\loadF9Data.py";
 const REFRESH_DATA_FROM_WIKI = "cgi-bin\\getF9Data.py";
 const MONTH_EPOCH = 1000*60*60*24*30;
 const HOUR_EPOCH = 1000*60*60;
+
+var highlightBooster = "";
 
 function el(id) {
     return document.getElementById(id);
@@ -63,7 +69,7 @@ function nextMode() {
     }
 
     mode++;
-    if (mode==MOUNTAIN) {
+    if (mode==MOUNTAIN || mode == LANDINGS) {
         mode++;
     }
     if (mode==LAST_MODE) {
@@ -74,8 +80,23 @@ function nextMode() {
     drawDiagram();
 }
 
+function convertRGBA(col, alpha) {
+    let r = parseInt(col.substring(1,3), 16);
+    let g = parseInt(col.substring(3,5), 16);
+    let b = parseInt(col.substring(5,7), 16);
+    return "rgba("+r+","+g+","+b+","+alpha+")";
+}
+
+function fillAlphaCols(alpha) {
+    for(let i = 0; i < COLS.length; i++) {
+        ALPHA_COLS[COLS[i]] = convertRGBA(COLS[i], alpha);
+    }
+}
+
+
 function init() {
     console.log("started.");
+    fillAlphaCols();
     //scrHeight = window.innerHeight;
     scrHeight = el("canv").height;
     //scrWidth = window.innerWidth;
@@ -94,6 +115,17 @@ function initGraph() {
     c.fillRect(0, 0,scrWidth,  scrHeight);
     c.lineWidth = sc(1);
     drawAxises();
+}
+
+function manualHighlightedBooster() {
+    highlightBooster = el("hlbooster").value;
+    redrawBoosterLines();
+}
+
+function redrawBoosterLines() {
+    mode = LAUNCHES;
+    initGraph();
+    drawDiagram();
 }
 
 function sc(a) {
@@ -342,12 +374,17 @@ function drawBoosterLines() {
         } else {
             console.error("booster faulty: " + booster);
         }
-        if (booster.id != "xxyy") {
-            strokeStyle(booster.col);
-            c.fillStyle = booster.col;
-        } else {
-            strokeStyle("#797979");
-            c.fillStyle = "#898989";
+        if (booster.launches[0].date.getTime() < startDate.getTime() -   MONTH_EPOCH * 4) {
+            continue;
+        }
+
+        strokeStyle(booster.col);
+        c.fillStyle = booster.col;
+        if (highlightBooster != "") {
+            if (booster.id != highlightBooster) {
+                strokeStyle("#797979");
+                c.fillStyle = "#898989";
+            }
         }
         
         let refly = 0;
@@ -368,11 +405,15 @@ function drawBoosterLines() {
             c.arc(newX, newY, sc(1.7), 0, 2 * Math.PI);
             c.fill();
             if (booster.id < "B1046") {
-                setColor("black");
+                if (highlightBooster == "") {
+                    setColor("black");
+                }
                 c.beginPath();
                 c.arc(newX, newY, sc(.7), 0, 2 * Math.PI);
                 c.fill();
-                setColor(booster.col);
+                if (highlightBooster == "") {
+                    setColor(booster.col);
+                }
                 //setColor("#898989");
             }
             lastX = newX;
@@ -386,11 +427,15 @@ function drawBoosterLines() {
             c.fillRect(lastX-sc(3), lastY-sc(3), sc(6), sc(6));
         }
         if (booster.id < "B1046") {
-            setColor("black");
+            if (highlightBooster == "") {
+                setColor("black");
+            }
             c.beginPath();
             c.arc(lastX, lastY, sc(.7), 0, 2 * Math.PI);
             c.fill();
-            setColor(booster.col);
+            if (highlightBooster == "") {
+                setColor(booster.col);
+            }
             //setColor("#898989");
         }
     }
@@ -430,6 +475,9 @@ function writeHorizontalBoosterNames(hBoosters) {
     c.font = ""+sc(10)+"px Ariana";
     for(let i = 0; i<hBoosters.length; i++) {
         let b = hBoosters[i];
+        if (b.launches[0].date.getTime() < startDate.getTime() - MONTH_EPOCH * 5) {
+            continue;
+        }
         let x = calculateX2(b.getLastLaunch().date.getTime());
         let rowI = 0;
         while(rowI < rows.length && rows[rowI] > x - sc(BOOSTERNAME_WIDTH)) {
@@ -454,7 +502,7 @@ function writeBoosterNames() {
         let booster = boosters[i];
         names[booster.launches.length].push(booster.id);
     }
-    for(i = 2; i < MAX_LANDING; i++) {
+    for(i = 3; i < MAX_LANDING; i++) {
         let y =  calculateLaunchY(i) + sc(3);
         let x = baseX + sc(10);
         let rightX = calclulateLeftAxisX() + sc(30);
@@ -491,7 +539,7 @@ function writeBoosterNames() {
         }
     }
     let hBoosters = [];
-    for(i = 0; i < 3; i++) {
+    for(i = 0; i < MAX_LANDING; i++) {
         for(j = 0;j<names[i].length; j++) {
             let booster = findBooster(names[i][j]);
             hBoosters.push(booster);
@@ -632,9 +680,10 @@ function drawAverageLine(firstDate) {
     return lastValue;
 }
 
-function saveCanvas(name) {
+function saveCanvas(name, onlyName = false) {
     var link = document.getElementById('link');
-    link.setAttribute('download', name + getDateStr("_")+".png");
+    let fileName = (onlyName? name : name + getDateStr("_")+".png");
+    link.setAttribute('download', fileName);
     link.setAttribute('href', el("canv").toDataURL("image/png").replace("image/png", "image/octet-stream"));
     link.click();
 }
@@ -661,11 +710,70 @@ function saveClick() {
         case BARCODE:
             saveCanvas("Falcon_barcode_");
             break;            
-    }    
+        case LANDINGS:
+            saveCanvas("Falcon_landings_");
+            break;
+        case LC_USAGE:
+            saveCanvas("Falcon_LC_usage_");
+            break;
+        }    
+}
+
+function stepOneMonth(d) {
+    if (d.getMonth()==11) {
+        d.setFullYear(d.getFullYear()+1);
+        d.setMonth(0);
+    } else {
+        d.setMonth(d.getMonth()+1);
+    }
+}
+
+function drawLaunchNoColumns() {
+    let firstDate = startDate;
+    let d = new Date(firstDate.getTime()-MONTH_EPOCH*5);
+    d.setDate(1);
+    let now = new Date();
+    let columns = [];
+    let maxCount = 0;
+
+    while (d.getTime() < endDate + MONTH_EPOCH*5) {
+        let count = 0;
+        let dNext = new Date(d.getTime());
+        stepOneMonth(dNext);
+        if (dNext > now) {
+            dNext = now;
+        }
+        for(let i = 0; i < launches.length;i ++) {
+            if (launches[i].date >= d && launches[i].date < dNext) {
+                count++;
+            }
+        }
+
+        let x = calculateX2(d.getTime());
+        let x1 = calculateX2(dNext.getTime());
+        let col = {"x": x, "x1" : x1, "count":count};
+        columns.push(col);
+        maxCount = (maxCount < count ? count : maxCount);
+
+        //console.log(d.getFullYear() + "-" + d.getMonth());
+        stepOneMonth(d);
+    }
+
+    setColor("rgb(59, 59, 59)");
+    for(let i = 0; i < columns.length; i++) {
+        let col = columns[i];
+        c.beginPath();
+        let height = scrHeight * 0.7 * col.count / maxCount;
+        c.rect(col.x, baseY-height, (col.x1 - col.x), height);
+        c.fill();
+    }
 }
 
 function launchesDiagram() {
-    drawTimeLine(launches[0].date);
+    startDate = launches[48].date;
+    initStep(startDate);
+    drawLaunchNoColumns();
+    drawTimeLine(startDate);
     drawLaunchNoAxisMarks();
     drawBoosterLines();
     writeBoosterNames();
@@ -730,6 +838,8 @@ function drawLaunchBarcodes() {
         }
         if (launches[i].isCrewedLaunch()) {
             col = "yellow";
+            console.log(launches[i]);
+            console.log(launches[i].landingSuccess);
         }
         setColor(col);
         drawLine(x, baseY, x, baseY - sc(len));
@@ -794,6 +904,18 @@ function refurbDiagram() {
     
 }
 
+function landingsDiagram() {
+/*
+    //drawLandingNoColumns();
+    collectLandingData();
+    drawTimeLine(launches[0].date);
+    drawLandingNoAxisMarks();
+    drawBoosterLines();
+    writeBoosterNames();*/
+    signImage();
+    
+}
+
 function storeData(data) {
     console.log('Data read. Length:');
     launchesStr = data.split('\n');
@@ -833,6 +955,12 @@ function drawDiagram() {
             break;
         case BARCODE:
             barcodeDiagram();
+            break;
+        case LC_USAGE:
+            LCDiagram();
+            break;
+        case LANDINGS:
+            landingsDiagram();
             break;
         }
     //*********************************************************************************************** */
@@ -895,7 +1023,8 @@ function signImage(lastAverage) {
     if (mode==REFURB) {
         c.fillStyle = "#F0F0F0";
     }
-    if (mode != AVERAGE && mode != MASS_TO_ORBIT && mode != CADENCE && mode != BARCODE) {
+    if (mode != AVERAGE && mode != MASS_TO_ORBIT && mode != CADENCE && mode != BARCODE 
+        && mode != LC_USAGE) {
         c.beginPath();
         let circleX = scrWidth * 3/10;
         let cubeX = scrWidth * 4/10;
@@ -960,6 +1089,10 @@ function signImage(lastAverage) {
     } else if (mode == BARCODE) {
         text = "Falcon launches \"barcode\"";
         length = sc(200);
+    } else if (mode == LANDINGS) {
+        text = "Falcon booster landings";
+    } else if (mode == LC_USAGE) {
+        text = "Falcon rockets' launch complex usage";
     }
 
     //c.fillText(text + " - " + getDateStr(" ") + "; last launch: " + getDateStr(" ", launches[launches.length-1].date), scrWidth/2 - length, scrHeight * 2/20);

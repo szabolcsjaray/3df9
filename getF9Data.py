@@ -15,9 +15,11 @@ FH_SIDE_1_ROW ="fhSide1"
 FH_SIDE_2_ROW ="fhSide2"
 BOOSTER_COL = 3
 LANDING_COL = 10
+debugOn = False
 
 def debugPrint(toPrint):
-    print(toPrint)
+    if debugOn:
+        print(toPrint)
 
 class MyHTMLParser(HTMLParser):
     lastTag = ""
@@ -47,9 +49,10 @@ class MyHTMLParser(HTMLParser):
                 self.actLaunch.append(self.id)
                 self.stack = [tag]
             elif len(self.stack) > 0:
-                self.stack.append(tag)
-                debugPrint("start tr in row")
-                debugPrint(self.stack)
+                if tag != "link":
+                    self.stack.append(tag)
+                    debugPrint("start tr in row")
+                    debugPrint(self.stack)
             elif self.lastTag == NEXT_ROW:
                 debugPrint("start tr nextRow")
                 self.stack = [tag]
@@ -69,7 +72,7 @@ class MyHTMLParser(HTMLParser):
             debugPrint(self.stack)
             if (tag == "td" or tag == "th") and self.column == NO_COLUMN:
                 self.column = len(self.stack)
-                debugPrint("Start collecting column:" + str(self.column))
+                debugPrint("Start collecting column:" + str(self.actLaunch))
                 self.collectData = ""
             if tag=="sup" or tag == "style":
                 debugPrint("sup/style skipData start")
@@ -83,60 +86,67 @@ class MyHTMLParser(HTMLParser):
         global FH_SIDE_2_ROW
         global BOOSTER_COL
         global LANDING_COL
+        global debugOn
 
         debugPrint("--- end tag: " + tag)
-        if self.lastTag!="":
-            popTag = self.stack.pop()
-            debugPrint("end tag, in row, popped:" + popTag )
-            debugPrint(self.stack)
-            if popTag != tag:
-                print("Tag mismatch " + tag + " != " + popTag)
-            if self.column > 0:
-                debugPrint("in column")
-                if (tag == "td" or tag == "th") and self.column > len(self.stack):
-                    debugPrint("column closed, data: ")
-                    debugPrint(self.collectData)
-                    self.actLaunch.append(self.collectData.strip())
-                    self.column = NO_COLUMN
-                if tag=="sup" or tag == "style":
-                    debugPrint("sup/style end")
-                    self.skipData = False
-            elif tag == "tr" and len(self.stack) == 0:
-                debugPrint("end row")
-                if self.lastTag == "tr":
-                    if self.actLaunch[0].startswith("FH"):
-                        self.lastTag = FH_SIDE_1_ROW
-                        debugPrint("fh s 1 row will come")
+        if tag != "link":
+            if self.lastTag!="":
+                popTag = self.stack.pop()
+                debugPrint("end tag, in row, popped:" + popTag )
+                debugPrint(self.stack)
+                if popTag != tag:
+                    print("Tag mismatch " + tag + " != " + popTag)
+                    print(self.stack)
+                    print("*************************************")
+                if self.column > 0:
+                    debugPrint("in column")
+                    if (tag == "td" or tag == "th") and self.column > len(self.stack):
+                        print("column closed, data: ")
+                        print(self.collectData)
+                        if (self.collectData.strip()=="16"):
+                            debugOn = True
+                        self.actLaunch.append(self.collectData.strip())
+                        self.column = NO_COLUMN
+                    if tag=="sup" or tag == "style":
+                        debugPrint("sup/style end")
+                        self.skipData = False
+                elif tag == "tr" and len(self.stack) == 0:
+                    debugPrint("end row")
+                    if self.lastTag == "tr":
+                        if self.actLaunch[0].startswith("FH"):
+                            self.lastTag = FH_SIDE_1_ROW
+                            debugPrint("fh s 1 row will come")
+                        else:
+                            debugPrint("nextRow will come")
+                            self.lastTag = NEXT_ROW
+                            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            #if (len(launches)>1):
+                            #    sys.exit();
+                            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    elif self.lastTag == FH_SIDE_1_ROW or self.lastTag == FH_SIDE_2_ROW:
+                        debugPrint("A side booster row ended.")
+                        debugPrint(self.actLaunch)
+                        boosterLanding = self.actLaunch.pop()
+                        booster = self.actLaunch.pop()
+                        self.actLaunch[BOOSTER_COL] = self.actLaunch[BOOSTER_COL] + " | " + booster
+                        self.actLaunch[LANDING_COL] = self.actLaunch[LANDING_COL] + " | " + boosterLanding
+                        debugPrint(self.actLaunch)
+                        if self.lastTag == FH_SIDE_1_ROW:
+                            self.lastTag = FH_SIDE_2_ROW
+                            debugPrint("fh s 2 row will come")
+                        else:
+                            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            #if (len(launches)>1):
+                            #    sys.exit();
+                            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            self.lastTag = NEXT_ROW
+                            debugPrint("nextRow will come")
                     else:
-                        debugPrint("nextRow will come")
-                        self.lastTag = NEXT_ROW
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        #if (len(launches)>1):
-                        #    sys.exit();
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                elif self.lastTag == FH_SIDE_1_ROW or self.lastTag == FH_SIDE_2_ROW:
-                    debugPrint("A side booster row ended.")
-                    debugPrint(self.actLaunch)
-                    boosterLanding = self.actLaunch.pop()
-                    booster = self.actLaunch.pop()
-                    self.actLaunch[BOOSTER_COL] = self.actLaunch[BOOSTER_COL] + " | " + booster
-                    self.actLaunch[LANDING_COL] = self.actLaunch[LANDING_COL] + " | " + boosterLanding
-                    debugPrint(self.actLaunch)
-                    if self.lastTag == FH_SIDE_1_ROW:
-                        self.lastTag = FH_SIDE_2_ROW
-                        debugPrint("fh s 2 row will come")
-                    else:
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        #if (len(launches)>1):
-                        #    sys.exit();
-                        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        self.lastTag = NEXT_ROW
-                        debugPrint("nextRow will come")
-                else:
-                    debugPrint("nextRow ended, saving data to launches")
-                    launches.append(self.actLaunch)
-                    self.lastTag = ""
-
+                        debugPrint("nextRow ended, saving data to launches")
+                        launches.append(self.actLaunch)
+                        self.lastTag = ""
+        else:
+            debugPrint("link end tag dropped")
 
     def handle_data(self, data):
         if self.column != NO_COLUMN:

@@ -20,6 +20,9 @@
     <script src="js/dataelement.js"></script>
     <script src="js/masstoorbit.js"></script>
     <script src="js/cadence.js"></script>
+    <script src="js/boosterlineanim.js"></script>
+    <script src="js/lc.js"></script>
+    <script src="js/landing.js"></script>
 </head>
 
 <body onload="init();">
@@ -29,6 +32,8 @@
     <div id="saveDiv" class="buttonDiv" onclick="saveClick();">Save</div>
     <div id="dimDiv" class="buttonDiv" onclick="dimensionClick();">3D/2D</div>
     <div id="refreashDataDiv" class="buttonDiv" onclick="refreshData();">Refresh data</div>
+    <div id="boosterLineAnim" class="buttonDiv" onclick="runBoosterLineAnim();">Booster anim</div>
+    <div id="HLDiv" class="buttonDiv">HL Booster: <input id="hlbooster" onchange="manualHighlightedBooster();"/></div>
 
     <div id="upDiv" class="buttonDiv" onclick="upButton();">UP</div>
     <div id="downDiv" class="buttonDiv" onclick="downButton();">DOWN</div>

@@ -46,6 +46,21 @@ body {
     left: 40%;
 }
 
+#HLDiv {
+    top: 20px;
+    left: 50%;
+}
+
+#boosterLineAnim {
+    top: 20px;
+    left: 65%;
+}
+
+#hlbooster {
+    font-size: 30px;
+    width: 200px;
+}
+
 #upDiv {
     top: 20px;
     left: 100px;

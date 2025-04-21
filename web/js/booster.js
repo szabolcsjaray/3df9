@@ -28,4 +28,11 @@ class Booster {
     isActive() {
         return this.getLastLanding().startsWith("Success");
     }
+
+    isActiveStill() {
+        if (!this.isActive()) {
+            return false;
+        }
+        return (days(this.getLastLaunch().date, new Date()) < 365/2);
+    }
 }

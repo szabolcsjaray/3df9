@@ -41,7 +41,7 @@ function calcMassY(mass) {
 
 function drawMassAxisMarks() {
     c.font = ""+sc(12)+"px Ariana";
-    let leftAxisX = calclulateLeftAxisX();
+    let rightAxisX = calclulateRightAxisX();
     for(let i= 500;i < heaviest + 200; i += 500) {
         let y = calcMassY(i)
         strokeStyle("gray");
@@ -55,14 +55,14 @@ function drawMassAxisMarks() {
         c.fillText(""+i, baseX - sc(42), y+4);
 
         
-        drawLine(leftAxisX - sc(10), y, leftAxisX + sc(10), y);
+        drawLine(rightAxisX - sc(10), y, rightAxisX + sc(10), y);
         c.beginPath();
-        c.fillText(""+i, leftAxisX + sc(12), y+sc(4));
+        c.fillText(""+i, rightAxisX + sc(12), y+sc(4));
 
     }
 
     c.fillText("kg", baseX - 30, calcMassY(heaviest + 400));
-    c.fillText("kg", leftAxisX + 22, calcMassY(heaviest + 400));
+    c.fillText("kg", rightAxisX + 22, calcMassY(heaviest + 400));
 }
 
 function getOrbitIndexMTO(launch) {

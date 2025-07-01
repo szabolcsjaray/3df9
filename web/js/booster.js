@@ -1,3 +1,5 @@
+var maxBoosterLaunchNum = 0;
+
 class Booster {
     constructor(id, type, firstLaunch, col) {
         this.id = id;
@@ -7,10 +9,12 @@ class Booster {
         this.mountainOrder = [];
         this.col = col;
         this.addLaunch(firstLaunch);
+        this.refurbs = [];
     }
 
     addLaunch(launch) {
         this.launches.push(launch);
+        maxBoosterLaunchNum = (maxBoosterLaunchNum > this.launches.length ? maxBoosterLaunchNum : this.launches.length);
         this.launchOrders.push(launch.getBoosterOrder(this.id));
     }
 
@@ -34,5 +38,17 @@ class Booster {
             return false;
         }
         return (days(this.getLastLaunch().date, new Date()) < 365/2);
+    }
+
+    addRefurb(refurb) {
+        this.refurbs.push(refurb);
+    }
+
+    clearRefurbs() {
+        this.refurbs = [];
+    }
+
+    isBlock5() {
+        return this.id >= "B1046";
     }
 }

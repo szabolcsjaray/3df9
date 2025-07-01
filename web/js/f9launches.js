@@ -7,6 +7,7 @@ var boosters = [];
 var landings = []; // landing objects array
 var baseX;
 var baseY;
+var rightAxisX;
 var step;
 var startDate;
 var endDate;
@@ -17,7 +18,7 @@ var allCol;
 var slCol;
 var diffCol;
 
-const MAX_LANDING = 28.0;
+const MAX_LANDING = 29.0;
 
 const LAUNCHES = 1;
 const REFURB = 2;
@@ -28,7 +29,8 @@ const CADENCE = 6;
 const BARCODE = 7;
 const LANDINGS = 8;
 const LC_USAGE = 9;
-const LAST_MODE = 10;
+const REFURBS = 10;
+const LAST_MODE = 11;
 
 var mode = LAUNCHES;
 
@@ -45,6 +47,9 @@ const MONTH_EPOCH = 1000*60*60*24*30;
 const HOUR_EPOCH = 1000*60*60;
 
 var highlightBooster = "";
+
+var globalSuccessCount;
+var monthlyMaxLaunch = 0;
 
 function el(id) {
     return document.getElementById(id);
@@ -92,7 +97,6 @@ function fillAlphaCols(alpha) {
         ALPHA_COLS[COLS[i]] = convertRGBA(COLS[i], alpha);
     }
 }
-
 
 function init() {
     console.log("started.");
@@ -157,7 +161,7 @@ function fillLaunchesArray(launchesStr) {
             let newLaunch = new Launch(launchArray[0],
                 launchArray[1],
                 launchArray[2],
-                launchArray[3],
+                launchArray[3].replaceAll("â€‘", "-"),
                 launchArray[4],
                 launchArray[5],
                 launchArray[6],
@@ -188,7 +192,7 @@ function calculateX2(epoch) {
     return baseX + step * (epoch-startDate);
 }
 
-function calclulateLeftAxisX() {
+function calclulateRightAxisX() {
     return scrWidth * 73/80;
 }
 
@@ -295,6 +299,7 @@ function collectBoosterData() {
             cnum = (cnum == COLS.length-1 ? 0 : cnum+1);
         }
     }
+    refillBoostersToLaunches();
 }
 
 function calculateLaunchY(flightNo) {
@@ -307,24 +312,45 @@ function calculateAverageY(flightNo) {
 
 function drawLaunchNoAxisMarks() {
     c.font = ""+ sc(10) + "px Ariana";
+
+    for(let li = 1; li <= /*monthlyMaxLaunch*/ MAX_LANDING ; li++) {
+        let y = calculateMonthlyLaunchNoHeight(li);
+        /*setColor("gray");
+        c.setLineDash([1, 5]);
+        //drawLine(scrWidth*1/20, baseY - y, scrWidth * 19/20, baseY - y);
+        drawLine(scrWidth*1/20, y, scrWidth * 19/20, y);*/
+
+        c.setLineDash([]);
+        strokeStyle("white");
+        c.lineWidth = sc(1);
+        //drawLine(baseX-sc(10), baseY - y, baseX + sc(10), baseY - y);
+        drawLine(baseX-sc(10), y, baseX + sc(10), y);
+        c.beginPath();
+        c.fillStyle = "white";
+        //c.fillText(""+li, baseX - sc(22), baseY - y + sc(4));
+        c.fillText(""+li, baseX - sc(22), y + sc(4));
+    }
+
+    rightAxisX = calclulateRightAxisX();
     for(let i= 1;i<MAX_LANDING;i++) {
         let y = calculateLaunchY(i);
         strokeStyle("gray");
         c.lineWidth =sc(0.6);
         drawLine(scrWidth*1/20, y, scrWidth * 19/20, y);
-        strokeStyle("white");
-        c.lineWidth = sc(1);
-        drawLine(baseX-sc(10), y, baseX +sc(10), y);
-        c.beginPath();
-        c.fillStyle = "white";
-        c.fillText(""+i, baseX - sc(22), y+sc(4));
 
-        let leftAxisX = calclulateLeftAxisX();
-        drawLine(leftAxisX - sc(10), y, leftAxisX + sc(10), y);
+        setColor("white");
+        drawLine(rightAxisX - sc(10), y, rightAxisX + sc(10), y);
         c.beginPath();
-        c.fillText(""+i, leftAxisX + 12, y+4);
+        c.fillText(""+i, rightAxisX + 12, y+4);
 
     }
+
+    c.font = ""+ sc(13) + "px Ariana";
+    centerText("Monthly launch no", baseX, scrHeight * 1/10);
+
+    centerText("Booster launch no", rightAxisX, scrHeight * 1/10);
+
+
 }
 
 function drawLaunchNoAxisMarksAverage() {
@@ -341,7 +367,7 @@ function drawLaunchNoAxisMarksAverage() {
         c.fillStyle = "white";
         c.fillText(""+i, baseX - sc(28), y+sc(4));
 
-        let leftAxisX = calclulateLeftAxisX();
+        let leftAxisX = calclulateRightAxisX();
         drawLine(leftAxisX - sc(10), y, leftAxisX + sc(10), y);
         c.beginPath();
         c.fillText(""+i, leftAxisX + sc(12), y+sc(4));
@@ -505,7 +531,7 @@ function writeBoosterNames() {
     for(i = 3; i < MAX_LANDING; i++) {
         let y =  calculateLaunchY(i) + sc(3);
         let x = baseX + sc(10);
-        let rightX = calclulateLeftAxisX() + sc(30);
+        let rightX = calclulateRightAxisX() + sc(30);
         c.font = ""+sc(12)+"px Ariana";
         for(let j = 0;j<names[i].length; j++) {
             let booster = findBooster(names[i][j]);
@@ -572,11 +598,14 @@ function drawRefurbLines() {
         c.fillStyle = booster.col;
         c.lineWidth = sc(1);
         let prevLaunch = booster.launches[0];
+        booster.clearRefurbs();
 
         for(let j = 1; j < booster.launches.length; j++) {
             let launch = booster.launches[j];
             let newY = calcRefurbY(launch.date.getTime()-prevLaunch.date.getTime());
             let newX = calculateX(launch);
+            let refurb = new Refurb(j, prevLaunch, launch);
+            booster.addRefurb(refurb);
             if (lastX>0) {
                 drawLine(lastX, lastY, newX, newY);
             }
@@ -618,7 +647,7 @@ function findFirstReflyDate() {
 
 function drawRefurbTimeScale() {
     const days = 68;
-    let leftAxisX = calclulateLeftAxisX();
+    let leftAxisX = calclulateRightAxisX();
     for(let i= 1;i<days;i++) {
 
         let y = calcRefurbY(HOUR_EPOCH*24*10*i);
@@ -716,6 +745,9 @@ function saveClick() {
         case LC_USAGE:
             saveCanvas("Falcon_LC_usage_");
             break;
+        case REFURBS:
+            saveCanvas("Falcon_booster__refurbiments_");
+            break;
         }    
 }
 
@@ -726,6 +758,11 @@ function stepOneMonth(d) {
     } else {
         d.setMonth(d.getMonth()+1);
     }
+}
+
+function calculateMonthlyLaunchNoHeight(launchNo) {
+    return calculateLaunchY(launchNo);
+    //return scrHeight * 0.7 * launchNo / monthlyMaxLaunch;
 }
 
 function drawLaunchNoColumns() {
@@ -759,12 +796,17 @@ function drawLaunchNoColumns() {
         stepOneMonth(d);
     }
 
+    monthlyMaxLaunch = maxCount;
+
     setColor("rgb(59, 59, 59)");
     for(let i = 0; i < columns.length; i++) {
         let col = columns[i];
         c.beginPath();
-        let height = scrHeight * 0.7 * col.count / maxCount;
-        c.rect(col.x, baseY-height, (col.x1 - col.x), height);
+        //let height = calculateMonthlyLaunchNoHeight(col.count);
+        let y = calculateMonthlyLaunchNoHeight(col.count);
+        //scrHeight * 0.7 * col.count / maxCount;
+        //c.rect(col.x, baseY-height, (col.x1 - col.x), height);
+        c.rect(col.x, y, (col.x1 - col.x), baseY - y);
         c.fill();
     }
 }
@@ -773,6 +815,7 @@ function launchesDiagram() {
     startDate = launches[48].date;
     initStep(startDate);
     drawLaunchNoColumns();
+    drawAxises();
     drawTimeLine(startDate);
     drawLaunchNoAxisMarks();
     drawBoosterLines();
@@ -784,7 +827,6 @@ function launchesDiagram() {
 function barcodeDiagram() {
     baseY = scrHeight * 7/10;
     drawTimeLine(launches[0].date);
-    //drawLaunchNoAxisMarks();
     drawLaunchBarcodes();
     signImage();
 }
@@ -807,7 +849,11 @@ function drawLaunchBarcodes() {
     let colIndex = 0;
     let year = launches[0].date.getFullYear();
     let yearCount = 0;
+    let successCount = 0;
     for(let i = 0; i < launches.length;i ++) {
+        if (launches[i].success == 'Failure') {
+            continue;
+        }
         let len = sc(100);
         let x = calculateX2(launches[i].date.getTime());
         let col = cols[colIndex];
@@ -825,15 +871,15 @@ function drawLaunchBarcodes() {
             year = actYear;
         }
 
-        if ( (i+1)%10 == 0) {
+        if ( (successCount+1)%10 == 0) {
             col = "white";
             len = sc(200);
-            if ((i+1)%100 == 0) {
+            if ((successCount+1)%100 == 0) {
                 len = sc(300);
                 setColor("white");
                 c.font = ""+sc(15)+"px Arial";
                 c.beginPath();
-                c.fillText(""+(i+1), x - sc(12), baseY - sc(len) - sc(5));
+                c.fillText(""+(successCount+1), x - sc(12), baseY - sc(len) - sc(5));
             }
         }
         if (launches[i].isCrewedLaunch()) {
@@ -848,16 +894,21 @@ function drawLaunchBarcodes() {
             c.arc( x, baseY - sc(len), sc(5), 0, 2 * Math.PI);
             c.fill();
         }
+        successCount++;
     }
     c.font = "" + sc(8) + "px Arial";
     let partnerColor = {"N" : "yellow", "A" : "#f5d142", "P" : "#98f542", "J" : "#98f542"};
+    successCount = 0;
     for(let i = 0; i < launches.length;i ++) {
         let launch = launches[i];
+        if (launch.success == 'Failure') {
+            continue;
+        }
         let len = sc(100);
         let x = calculateX2(launch.date.getTime());
-        if ( (i+1)%10 == 0) {
+        if ( (successCount+1)%10 == 0) {
             len = sc(200);
-            if ((i+1)%100 == 0) {
+            if ((successCount+1)%100 == 0) {
                 len = sc(300);
             }
         }
@@ -875,7 +926,9 @@ function drawLaunchBarcodes() {
             c.fillText(launch.partner.substring(0,1), x-sc(3.2), baseY - sc(len) + sc(2.9) );
             c.fill();
         }
+        successCount++;
     }
+    globalSuccessCount = successCount + 1;
     writeYearCount(year, yearCount);
     setColor("white");
 }
@@ -959,6 +1012,9 @@ function drawDiagram() {
         case LC_USAGE:
             LCDiagram();
             break;
+        case REFURBS:
+            refurbsDiagram();
+            break;
         case LANDINGS:
             landingsDiagram();
             break;
@@ -973,7 +1029,7 @@ function getDateStr(separator, d = new Date()) {
 }
 
 function centerText(txt, x, y) {
-    console.log("centerText width: " + c.measureText(txt).width);
+    //console.log("centerText width: " + c.measureText(txt).width);
     c.fillText(txt, x - c.measureText(txt).width/2, y);
 }
 
@@ -1024,7 +1080,7 @@ function signImage(lastAverage) {
         c.fillStyle = "#F0F0F0";
     }
     if (mode != AVERAGE && mode != MASS_TO_ORBIT && mode != CADENCE && mode != BARCODE 
-        && mode != LC_USAGE) {
+        && mode != LC_USAGE && mode != REFURBS) {
         c.beginPath();
         let circleX = scrWidth * 3/10;
         let cubeX = scrWidth * 4/10;
@@ -1047,7 +1103,7 @@ function signImage(lastAverage) {
         c.fillStyle = "#F0F0F0";
         c.font = ""+sc(24)+"px Arial";
         c.beginPath();
-        c.fillText("Number of launches to date: " + launches.length, scrWidth/2 - sc(160), scrHeight * 3/20);
+        c.fillText("Number of launches to date: " + globalSuccessCount, scrWidth/2 - sc(160), scrHeight * 3/20);
     }
 
     c.fillStyle = "#F0F0F0";
@@ -1093,6 +1149,20 @@ function signImage(lastAverage) {
         text = "Falcon booster landings";
     } else if (mode == LC_USAGE) {
         text = "Falcon rockets' launch complex usage";
+    } else if (mode == REFURBS) {
+        c.font = ""+sc(20)+"px Arial";
+        setColor("#30A0FF");
+        c.fillText("Pre Block 5 boosters", scrWidth* 3/20, scrHeight * 4/20);
+        setColor("white");
+        c.fillText("Block 5 boosters", scrWidth* 6/20, scrHeight * 4/20);
+        setColor("yellow");
+        c.fillText("Average Block 5 midflight time", scrWidth* 10/20, scrHeight * 4/20);
+        setColor("orange");
+        c.fillText("Median Block 5 midflight time", scrWidth* 13/20, scrHeight * 4/20);
+
+        c.fillStyle = "#F0F0F0";
+        c.font = ""+sc(24)+"px Arial";
+        text = "Falcon boosters' midflight times after n-th flight";
     }
 
     //c.fillText(text + " - " + getDateStr(" ") + "; last launch: " + getDateStr(" ", launches[launches.length-1].date), scrWidth/2 - length, scrHeight * 2/20);
@@ -1112,12 +1182,16 @@ function drawLine(x0, y0, x1, y1) {
 }
 
 function drawAxises(forceDraw = false) {
+    yAxisShortening = 0;
+    if (mode == LAUNCHES) {
+        yAxisShortening = sc(13);
+    }
+    rightAxisX = calclulateRightAxisX();
     if (mode != BARCODE || forceDraw) {
         strokeStyle("white");
-        drawLine(baseX, baseY + scrHeight/20, baseX, scrHeight/10);
+        drawLine(baseX, baseY + scrHeight/20, baseX, scrHeight/10 + yAxisShortening);
         drawLine(scrWidth/20, baseY, scrWidth * 19/20, baseY);
-        let leftAxisX = calclulateLeftAxisX();
-        drawLine(leftAxisX, baseY + scrHeight/20, leftAxisX, scrHeight/10);
+        drawLine(rightAxisX, baseY + scrHeight/20, rightAxisX, scrHeight/10 + yAxisShortening);
     }
 }
 

@@ -145,6 +145,8 @@ function calculateLaunchNumY(num) {
 
 function drawLCNoAxisMarks() {
     c.font = ""+ sc(14) + "px Ariana";
+    let rightAxisX = calclulateRightAxisX();
+
     for(let i= LC_LAUNCH_NUM_STEP; i < maxLCLaunchNum + LC_LAUNCH_NUM_STEP;i+= LC_LAUNCH_NUM_STEP) {
         let y = calculateLaunchNumY(i);
         strokeStyle("gray");
@@ -157,10 +159,9 @@ function drawLCNoAxisMarks() {
         c.fillStyle = "white";
         c.fillText(""+i, baseX - sc(28), y+sc(4));
 
-        let leftAxisX = calclulateLeftAxisX();
-        drawLine(leftAxisX - sc(10), y, leftAxisX + sc(10), y);
+        drawLine(rightAxisX - sc(10), y, rightAxisX + sc(10), y);
         c.beginPath();
-        c.fillText(""+i, leftAxisX + sc(12), y+sc(4));
+        c.fillText(""+i, rightAxisX + sc(12), y+sc(4));
 
     }
 }
@@ -197,6 +198,8 @@ class LC {
     }
 
     addLaunch(launch) {
-        this.launches.push(launch);
+        if (this.launches.indexOf(launch) == -1) {
+            this.launches.push(launch);
+        }
     }
 }

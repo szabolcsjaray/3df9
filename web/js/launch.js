@@ -1,7 +1,13 @@
 const ORBITS = ["GTO", "LEO (ISS)", "LEO", "Polar", "MEO", "Ballistic lunar transfer", "SSO", "Heliocentric", "TLI", "GEO"];
 
+function refillBoostersToLaunches() {
+    for(let i = 0; i< launches.length; i++) {
+        launches[i].findBoosters();
+    }
+}
+
 class Launch {
-    constructor(id, num, date, boosters, launchSite, payload, payloadMass, orbit, partner, success, landingSuccess, description) {
+    constructor(id, num, date, boostersStr, launchSite, payload, payloadMass, orbit, partner, success, landingSuccess, description) {
         this.id = id;
         this.num = num;
         if ((date.match(/ /g) || []).length > 3) {
@@ -9,7 +15,7 @@ class Launch {
         }
         this.dateStr = date;
         this.date = new Date(Date.parse(date));
-        this.boosters = boosters;
+        this.boostersStr = boostersStr;
         this.launchSite = launchSite;
         this.payload = payload;
         this.payloadMass = payloadMass;
@@ -26,15 +32,25 @@ class Launch {
         return this.boosterIds.indexOf(boosterId);
     }
 
+    findBoosters() {
+        this.boosters = [];
+        for(let i = 0; i< this.boosterIds.length; i++) {
+            let booster = findBooster(this.boosterIds[i]);
+            if (booster != null) {
+                this.boosters.push(booster);
+            }
+        }
+    }
+
     collectBoosterIds() {
-        let words =this.boosters.split(" ");
-        words = words.filter(word => word.startsWith('B') && (word.length == 5 || (word.length>5 && word[5]=='.')));
+        let words =this.boostersStr.split(" ");
+        words = words.filter(word => word.startsWith('B') && (word.length >= 5));
         words = words.map(boosterId => boosterId.substring(0,5));
         if (words.length<1) {
             words = [this.id];
         }
-        if (words.length>1 || this.boosters.indexOf('|')!=-1) {
-            console.log("boosters: of " + this.boosters);
+        if (words.length>1 || this.boostersStr.indexOf('|')!=-1) {
+            console.log("boosters: of " + this.boostersStr);
             console.log(words);
         }
         return words;

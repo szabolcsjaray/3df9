@@ -10,7 +10,7 @@ function isNum(c) {
 
 function drawCadenceAxisMarks(highest) {
     c.font = ""+sc(14)+"px Ariana";
-    let leftAxisX = calclulateLeftAxisX();
+    let rightAxisX = calclulateRightAxisX();
     for(let i= 2;i < highest + 2; i += 2) {
         let y = calculateCadenceY(i, highest);
         strokeStyle("gray");
@@ -23,9 +23,9 @@ function drawCadenceAxisMarks(highest) {
         c.fillStyle = "white";
         c.fillText(""+i, baseX - sc(30), y+sc(4));
         
-        drawLine(leftAxisX - sc(10), y, leftAxisX + sc(10), y);
+        drawLine(rightAxisX - sc(10), y, rightAxisX + sc(10), y);
         c.beginPath();
-        c.fillText(""+i, leftAxisX + sc(12), y+sc(4));
+        c.fillText(""+i, rightAxisX + sc(12), y+sc(4));
 
     }
 }

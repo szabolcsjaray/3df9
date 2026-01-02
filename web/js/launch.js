@@ -15,6 +15,7 @@ class Launch {
         }
         this.dateStr = date;
         this.date = new Date(Date.parse(date));
+        console.log(this.date);
         this.boostersStr = boostersStr;
         this.launchSite = launchSite;
         this.payload = payload;

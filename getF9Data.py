@@ -8,6 +8,7 @@ import sys
 launches = []
 WIKI_PAGES = ["https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2010%E2%80%932019)",
  "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2020%E2%80%932022)",
+ "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2023)",
  "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches"];
 NO_COLUMN = -1
 NEXT_ROW = "nextRow"
@@ -16,10 +17,15 @@ FH_SIDE_2_ROW ="fhSide2"
 BOOSTER_COL = 3
 LANDING_COL = 10
 debugOn = False
+logF = None
 
 def debugPrint(toPrint):
+    global debugOn
+    global logF
     if debugOn:
         print(toPrint)
+        logF.write(str(toPrint) + "\n")
+
 
 class MyHTMLParser(HTMLParser):
     lastTag = ""
@@ -43,7 +49,7 @@ class MyHTMLParser(HTMLParser):
             if self.lastTag=="" and len(attrs)>0 and attrs[0][0]=="id":
                 self.lastTag = tag
                 debugPrint("Start:" + tag)
-                print(attrs)
+                debugPrint(attrs)
                 self.id = attrs[0][1]
                 self.actLaunch = []
                 self.actLaunch.append(self.id)
@@ -67,7 +73,7 @@ class MyHTMLParser(HTMLParser):
                 debugPrint(self.stack)
         elif self.lastTag != "":
             debugPrint("in row, not tr")
-            if tag != "link":
+            if tag != "link" and tag != "br" and tag != "hr" and tag != "img":
                 self.stack.append(tag)
             debugPrint(self.stack)
             if (tag == "td" or tag == "th") and self.column == NO_COLUMN:
@@ -89,8 +95,10 @@ class MyHTMLParser(HTMLParser):
         global debugOn
 
         debugPrint("--- end tag: " + tag)
-        if tag != "link":
+        if tag != "link" and tag != "img" and tag != "br" and tag != "hr":
             if self.lastTag!="":
+                if len(self.stack) == 0:
+                    print("stack is empty, but trying to pop: " + tag)
                 popTag = self.stack.pop()
                 debugPrint("end tag, in row, popped:" + popTag )
                 debugPrint(self.stack)
@@ -101,8 +109,8 @@ class MyHTMLParser(HTMLParser):
                 if self.column > 0:
                     debugPrint("in column")
                     if (tag == "td" or tag == "th") and self.column > len(self.stack):
-                        print("column closed, data: ")
-                        print(self.collectData)
+                        debugPrint("column closed, data: ")
+                        debugPrint(self.collectData)
                         if (self.collectData.strip()=="16"):
                             debugOn = True
                         self.actLaunch.append(self.collectData.strip())
@@ -160,20 +168,30 @@ class MyHTMLParser(HTMLParser):
             #else:
             #    print("------------------- Skipped data: " + data.strip())
 
-
+numF = 1
 for pageAddress in WIKI_PAGES:
     print("Processing page: " + pageAddress)
-    data = urllib.request.urlopen(pageAddress).read().decode("utf-8")
+    headers = {'User-Agent': 'JarayBot/1.0 (no webpage; jaraysz@gmail.com)'}
+    req = urllib.request.Request(pageAddress, headers=headers)
+    data = urllib.request.urlopen(req).read().decode("utf-8")
     data = data.replace('\u267a', "REUSE")
     data = data.replace('\u2192', "RARROW")
-    #debugPrint(data)
-    parser = MyHTMLParser()
-    parser.feed(data)
-debugPrint(launches)
+
+    with codecs.open("f9ls_"+str(numF)+".html", "w", "utf-8") as f:
+        f.write(data)
+    if numF == 4:
+        debugOn = True
+    else:
+        debugOn = False
+    with codecs.open("log_"+str(numF)+".log", "w", "utf-8") as logF:
+        parser = MyHTMLParser()
+        parser.feed(data)
+    numF = numF + 1
+#debugPrint(launches)
 
 today = datetime.today().strftime('%Y-%m-%d');
 with codecs.open("f9launches_"+today+".csv", "w", "utf-8") as f:
     for row in launches:
         for col in row:
-            f.write(col + ";")
+            f.write(col.replace("\n", "NEWLINE") + ";")
         f.write("\n")

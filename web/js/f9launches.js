@@ -18,7 +18,7 @@ var allCol;
 var slCol;
 var diffCol;
 
-const MAX_LANDING = 33.0;
+const MAX_LANDING = 34.0;
 
 const LAUNCHES = 1;
 const REFURB = 2;
@@ -41,7 +41,8 @@ var ALPHA_COLS = {};
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 
-const F9_CGI_SCRIPT = "cgi-bin\\loadF9Data.py";
+//const F9_CGI_SCRIPT = "cgi-bin\\loadF9Data.py";
+const F9_CGI_SCRIPT = "f9data.csv";
 const REFRESH_DATA_FROM_WIKI = "cgi-bin\\getF9Data.py";
 const MONTH_EPOCH = 1000*60*60*24*30;
 const HOUR_EPOCH = 1000*60*60;
@@ -307,7 +308,7 @@ function calculateLaunchY(flightNo) {
 }
 
 function calculateAverageY(flightNo) {
-    return baseY - flightNo*scrHeight/21;
+    return baseY - flightNo*scrHeight/25;
 }
 
 function drawLaunchNoAxisMarks() {
@@ -353,9 +354,11 @@ function drawLaunchNoAxisMarks() {
 
 }
 
+const MAX_AVERAGE_REFLIGHT = 19;
+
 function drawLaunchNoAxisMarksAverage() {
     c.font = ""+ sc(14) + "px Ariana";
-    for(let i= 1;i<16;i++) {
+    for(let i= 1;i<MAX_AVERAGE_REFLIGHT;i++) {
         let y = calculateAverageY(i);
         strokeStyle("gray");
         c.lineWidth = sc(0.6);

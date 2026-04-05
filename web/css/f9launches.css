@@ -44,6 +44,7 @@ body {
 #refreashDataDiv {
     top: 20px;
     left: 40%;
+    background-color: rgb(247, 247, 97);
 }
 
 #HLDiv {
@@ -65,21 +66,25 @@ body {
     top: 20px;
     left: 100px;
     transform: translate(-50%, -50%);
+    display: none;
 }
 
 #downDiv {
     top: 80px;
     left: 100px;
     transform: translate(-50%, -50%);
+    display: none;
 }
 
 #leftDiv {
     top: 50px;
     left: 40px;
     transform: translate(-50%, -50%);
+    display: none;
 }
 #rightDiv {
     top: 50px;
     left: 140px;
     transform: translate(-50%, -50%);
+    display: none;
 }

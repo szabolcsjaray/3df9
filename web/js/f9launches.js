@@ -18,7 +18,7 @@ var allCol;
 var slCol;
 var diffCol;
 
-const MAX_LANDING = 34.0;
+const MAX_LANDING = 35.0;
 
 const LAUNCHES = 1;
 const REFURB = 2;
@@ -56,13 +56,22 @@ function el(id) {
     return document.getElementById(id);
 }
 
+function navigateButtons(showMode) {
+    el("upDiv").style.display = showMode;
+    el("downDiv").style.display = showMode;
+    el("leftDiv").style.display = showMode;
+    el("rightDiv").style.display = showMode;
+}
+
 function dimensionClick() {
     if (mode!=MOUNTAIN) {
         mode = MOUNTAIN;
+        navigateButtons("block");
         initGraph();
         drawDiagram();
     } else {
         mode = LAUNCHES;
+        navigateButtons("none");
         el("canv").style.display = "block";
         initGraph();
         drawDiagram();
@@ -140,6 +149,9 @@ function sc(a) {
 
 function readResource(resource, process) {
     var xhttp = new XMLHttpRequest();
+    
+    let url = resource + (resource.includes('?') ? '&' : '?') + 'nocache=' + Date.now();
+    
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             // Typical action to be performed when the document is ready:
@@ -147,7 +159,10 @@ function readResource(resource, process) {
             process(xhttp.responseText);
         }
     };
-    xhttp.open("GET", resource, true);
+    xhttp.open("GET", url, true);
+    xhttp.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    xhttp.setRequestHeader('Pragma', 'no-cache');
+    xhttp.setRequestHeader('Expires', '0');
     xhttp.send();
 }
 
@@ -309,7 +324,7 @@ function calculateLaunchY(flightNo) {
 }
 
 function calculateAverageY(flightNo) {
-    return baseY - flightNo*scrHeight/25;
+    return baseY - flightNo*scrHeight/28;
 }
 
 function drawLaunchNoAxisMarks() {
@@ -355,7 +370,7 @@ function drawLaunchNoAxisMarks() {
 
 }
 
-const MAX_AVERAGE_REFLIGHT = 19;
+const MAX_AVERAGE_REFLIGHT = 20;
 
 function drawLaunchNoAxisMarksAverage() {
     c.font = ""+ sc(14) + "px Ariana";

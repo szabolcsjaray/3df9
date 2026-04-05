@@ -63,6 +63,7 @@ function dimensionClick() {
         drawDiagram();
     } else {
         mode = LAUNCHES;
+        el("canv").style.display = "block";
         initGraph();
         drawDiagram();
     }
@@ -1199,7 +1200,16 @@ function drawAxises(forceDraw = false) {
 }
 
 function refreshData() {
-    var xhttp = new XMLHttpRequest();
+    const url = new URL(window.location.href);
+  
+    url.searchParams.delete('noCache');
+    url.searchParams.delete('reload');
+
+    url.searchParams.set('noCache', Date.now());
+
+    window.location.href = url.toString();
+
+    /*var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             // Typical action to be performed when the document is ready:
@@ -1208,5 +1218,5 @@ function refreshData() {
         }
     };
     xhttp.open("GET", REFRESH_DATA_FROM_WIKI, true);
-    xhttp.send();
+    xhttp.send();*/
 }

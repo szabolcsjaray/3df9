@@ -111,8 +111,8 @@ class MyHTMLParser(HTMLParser):
                     if (tag == "td" or tag == "th") and self.column > len(self.stack):
                         debugPrint("column closed, data: ")
                         debugPrint(self.collectData)
-                        if (self.collectData.strip()=="16"):
-                            debugOn = True
+                        #if (self.collectData.strip()=="16"):
+                        #    debugOn = True
                         self.actLaunch.append(self.collectData.strip())
                         self.column = NO_COLUMN
                     if tag=="sup" or tag == "style":
@@ -179,10 +179,10 @@ for pageAddress in WIKI_PAGES:
 
     with codecs.open("f9ls_"+str(numF)+".html", "w", "utf-8") as f:
         f.write(data)
-    if numF == 4:
-        debugOn = True
-    else:
-        debugOn = False
+    #if numF == 4:
+    #    debugOn = True
+    #else:
+    #    debugOn = False
     with codecs.open("log_"+str(numF)+".log", "w", "utf-8") as logF:
         parser = MyHTMLParser()
         parser.feed(data)

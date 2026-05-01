@@ -27,7 +27,12 @@
 </head>
 
 <body onload="init();">
-    <canvas width="3500" height="1800" id="canv" style="position:absolute;top:0px;left:0px;background-color: rgb(29, 29, 29);"></canvas>
+    <canvas width="3500" height="1800" id="canv" style="position:absolute;top:0px;left:0px;background-color: rgb(29, 29, 29);">
+    </canvas>
+    <div class="flyDiv" id="flightDataPopup" style="background-color: rgb(199, 199, 199);top:300px;left:200px;z-index:100;">
+        <div id="closeFlightData">X</div>
+    </div>
+    <img id="target" src="pics/target.png" class="flyTarget">
     <a id="link"></a>
     <div id="nextDiv" class="buttonDiv" onclick="nextMode();">Next</div>
     <div id="saveDiv" class="buttonDiv" onclick="saveClick();">Save</div>

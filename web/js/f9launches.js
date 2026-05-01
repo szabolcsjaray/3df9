@@ -449,6 +449,18 @@ function drawBoosterLines() {
             c.beginPath();
             c.arc(newX, newY, sc(1.7), 0, 2 * Math.PI);
             c.fill();
+            
+            let flightDiv = document.createElement("div");
+            flightDiv.className = "flyDiv";
+            flightDiv.style.top = (newY - sc(2.5)) + "px";
+            flightDiv.style.left = (newX - sc(2.5)) + "px";
+            flightDiv.style.width =  (2*sc(2.5)) + "px";
+            flightDiv.style.height =  (2*sc(2.5)) + "px";
+            flightDiv.id = "BF" + i + "-" + j;
+            flightDiv.addEventListener('mouseenter', () => showFlightData(i, j, newX, newY));
+            //flightDiv.addEventListener('mouseleave', () => hideFlightData(i, j));
+            document.body.appendChild(flightDiv);
+
             if (booster.id < "B1046") {
                 if (highlightBooster == "") {
                     setColor("black");
@@ -488,6 +500,51 @@ function drawBoosterLines() {
     console.log("min Refly Booster:" + minBooster);
     console.log("min refly launch: ");
     console.log(minLaunch);
+}
+
+function showFlightData(boosterI, flightJ, x, y) {
+    let fDiv = el("flightDataPopup");
+    let booster = boosters[boosterI];
+    let launch = booster.launches[flightJ];
+    fDiv.innerHTML = "<b>Booster: " + booster.id + "</b>"
+        + "<br><b>Flight:</b> " + (flightJ+1) +" / " + booster.launches.length + "."
+        + "<br><b>Launch site:</b> " + launch.launchSite
+        + "<br><b>Payload:</b> " + launch.payload + " (mass: " + launch.payloadMass + ")"
+        + "<br><b>Orbit:</b> " + launch.orbit
+        + "<br><b>Partner:</b> " + launch.partner
+        + "<br><b>Landing:</b> " + booster.getLanding(flightJ)
+        + "<br><b>Mission:</b> " + launch.description
+        + "<div id=\"closeFlightData\">X</div>"
+        ;
+        fDiv.style.display = "block";
+    el("target").style.left = (x-75) + "px";
+    el("target").style.top = (y-75) + "px";
+    if (!rotationOn) {
+        rotationOn = true;
+        el("target").style.display = "block";
+        rotateTarget();
+    }
+    el("closeFlightData").onclick = closeFlightDataDiv;
+}
+
+function closeFlightDataDiv() {
+    el("flightDataPopup").style.display = "none";
+    rotationOn = false;
+    el("target").style.display = "none";
+}
+
+var targetDeg = 0;
+var rotationOn = false;
+
+function rotateTarget() {
+    targetDeg += 5;
+    if (targetDeg > 360) {
+        targetDeg -=360;
+    }
+    el("target").style.transform = `rotate(${targetDeg}deg)`;
+    if (rotationOn) {
+        setTimeout(rotateTarget, 40);
+    }
 }
 
 function findBooster(id) {
@@ -840,6 +897,9 @@ function launchesDiagram() {
     drawBoosterLines();
     writeBoosterNames();
     signImage();
+    let flightData = el("flightDataPopup");
+    flightData.style.left = sc(400) + "px";
+    flightData.style.top = sc(200) +"px";
     
 }
 

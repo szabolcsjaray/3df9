@@ -22,6 +22,12 @@ class Booster {
         return this.launches[this.launches.length-1];
     }
 
+    getLanding(landingI) {
+        let launch = this.launches[landingI];
+        let launchOrder = this.launchOrders[landingI];
+        return launch.getLandingResult(launchOrder);
+    }
+
     getLastLanding() {
         let lastLaunch = this.getLastLaunch();
         let lastLaunchOrder = this.launchOrders[this.launchOrders.length-1];

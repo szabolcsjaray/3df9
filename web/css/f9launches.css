@@ -135,6 +135,7 @@ img.flyTarget  {
     padding: 10px;
     display: none;
     max-width: 1200px;
+    text-align: left;
 }
 
 body {

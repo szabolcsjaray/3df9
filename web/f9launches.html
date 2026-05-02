@@ -27,23 +27,27 @@
 </head>
 
 <body onload="init();">
-    <canvas width="3500" height="1800" id="canv" style="position:absolute;top:0px;left:0px;background-color: rgb(29, 29, 29);">
-    </canvas>
-    <div class="flyDiv" id="flightDataPopup" style="background-color: rgb(199, 199, 199);top:300px;left:200px;z-index:100;">
-        <div id="closeFlightData">X</div>
+    <div id="content">
+        <canvas width="3500" height="1800" id="canv" style="position:absolute;top:0px;left:0px;background-color: rgb(29, 29, 29);">
+        </canvas>
+        <div class="flyDiv" id="flightDataPopup" style="background-color: rgb(199, 199, 199);top:300px;left:200px;z-index:100;">
+            <div id="closeFlightData">X</div>
+        </div>
+        <img id="target" src="pics/target.png" class="flyTarget">
+        <a id="link"></a>
+        <div id="nextDiv" class="buttonDiv" onclick="nextMode();">Next</div>
+        <div id="saveDiv" class="buttonDiv" onclick="saveClick();">Save</div>
+        <div id="dimDiv" class="buttonDiv" onclick="dimensionClick();">3D/2D</div>
+        <div id="refreashDataDiv" class="buttonDiv" onclick="refreshData();">Refresh data</div>
+        <!--div id="boosterLineAnim" class="buttonDiv" onclick="runBoosterLineAnim();">Booster anim</div-->
+        <div id="HLDiv" class="buttonDiv">HL Booster: <input id="hlbooster" onchange="manualHighlightedBooster();"/></div>
+    
+        <div id="upDiv" class="buttonDiv" onclick="upButton();">UP</div>
+        <div id="downDiv" class="buttonDiv" onclick="downButton();">DOWN</div>
+        <div id="leftDiv" class="buttonDiv" onclick="leftButton();">LEFT</div>
+        <div id="rightDiv" class="buttonDiv" onclick="rightButton();">RIGHT</div>
     </div>
-    <img id="target" src="pics/target.png" class="flyTarget">
-    <a id="link"></a>
-    <div id="nextDiv" class="buttonDiv" onclick="nextMode();">Next</div>
-    <div id="saveDiv" class="buttonDiv" onclick="saveClick();">Save</div>
-    <div id="dimDiv" class="buttonDiv" onclick="dimensionClick();">3D/2D</div>
-    <div id="refreashDataDiv" class="buttonDiv" onclick="refreshData();">Refresh data</div>
-    <!--div id="boosterLineAnim" class="buttonDiv" onclick="runBoosterLineAnim();">Booster anim</div-->
-    <div id="HLDiv" class="buttonDiv">HL Booster: <input id="hlbooster" onchange="manualHighlightedBooster();"/></div>
+    
 
-    <div id="upDiv" class="buttonDiv" onclick="upButton();">UP</div>
-    <div id="downDiv" class="buttonDiv" onclick="downButton();">DOWN</div>
-    <div id="leftDiv" class="buttonDiv" onclick="leftButton();">LEFT</div>
-    <div id="rightDiv" class="buttonDiv" onclick="rightButton();">RIGHT</div>
 </body>
 </html>

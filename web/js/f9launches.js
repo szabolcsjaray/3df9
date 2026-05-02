@@ -65,6 +65,7 @@ function navigateButtons(showMode) {
 
 function dimensionClick() {
     if (mode!=MOUNTAIN) {
+        closeFlightDataDiv();
         mode = MOUNTAIN;
         navigateButtons("block");
         initGraph();
@@ -79,7 +80,7 @@ function dimensionClick() {
 }
 
 function nextMode() {
-
+    closeFlightDataDiv();
     if (mode==BARCODE) {
         baseY = scrHeight * 9/10;
     }
@@ -123,6 +124,15 @@ function init() {
     initGraph();
     
     fetchData();
+    zoomToFit();
+}
+
+function zoomToFit() {
+      const scaleX = window.innerWidth / el("canv").width;
+      const scaleY = window.innerHeight / el("canv").height;
+      const scale = Math.min(scaleX, scaleY);   // Keep aspect ratio
+
+      el("content").style.transform = `scale(${scale})`;
 }
 
 function initGraph() {
@@ -459,7 +469,7 @@ function drawBoosterLines() {
             flightDiv.id = "BF" + i + "-" + j;
             flightDiv.addEventListener('mouseenter', () => showFlightData(i, j, newX, newY));
             //flightDiv.addEventListener('mouseleave', () => hideFlightData(i, j));
-            document.body.appendChild(flightDiv);
+            el("content").appendChild(flightDiv);
 
             if (booster.id < "B1046") {
                 if (highlightBooster == "") {
@@ -503,6 +513,9 @@ function drawBoosterLines() {
 }
 
 function showFlightData(boosterI, flightJ, x, y) {
+    if (mode != LAUNCHES)  {
+        return;
+    }
     let fDiv = el("flightDataPopup");
     let booster = boosters[boosterI];
     let launch = booster.launches[flightJ];

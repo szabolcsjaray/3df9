@@ -520,7 +520,8 @@ function showFlightData(boosterI, flightJ, x, y) {
     let booster = boosters[boosterI];
     let launch = booster.launches[flightJ];
     fDiv.innerHTML = "<b>Booster: " + booster.id + "</b>"
-        + "<br><b>Flight:</b> " + (flightJ+1) +" / " + booster.launches.length + "."
+        + "<br><b>Flight:</b> " + (flightJ+1) +" / " + booster.launches.length + "." 
+        + "<br><b>Date:</b> " + launch.date.toString().replace(/ \(.*\)$/, '')
         + "<br><b>Launch site:</b> " + launch.launchSite
         + "<br><b>Payload:</b> " + launch.payload + " (mass: " + launch.payloadMass + ")"
         + "<br><b>Orbit:</b> " + launch.orbit

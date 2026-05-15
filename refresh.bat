@@ -1,4 +1,4 @@
 cd web
 python ..\getF9Data.py
-cplatest.bat
+call cplatest.bat
 startServer.bat

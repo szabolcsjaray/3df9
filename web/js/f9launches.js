@@ -1040,8 +1040,19 @@ function launchesAverageDiagram() {
     
 }
 
+function removeDivsByClass(className) {
+    if (!className || typeof className !== 'string') {
+        return;
+    }
+
+    const divs = document.querySelectorAll(`div.${className.trim()}`);
+    
+    divs.forEach(div => div.remove());
+}
+
 function refurbDiagram() {
-    let firstDate = findFirstReflyDate();
+    removeDivsByClass("flyDiv");
+    const firstDate = findFirstReflyDate();
     initStep(firstDate.getTime());
     drawRefurbTimeScale();
     signImage();

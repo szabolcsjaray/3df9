@@ -3,6 +3,8 @@ import codecs
 from html.parser import HTMLParser
 from datetime import datetime
 import sys
+import certifi
+import ssl
 
 
 launches = []
@@ -172,8 +174,9 @@ numF = 1
 for pageAddress in WIKI_PAGES:
     print("Processing page: " + pageAddress)
     headers = {'User-Agent': 'JarayBot/1.0 (no webpage; jaraysz@gmail.com)'}
+    ctx = ssl.create_default_context(cafile=certifi.where())
     req = urllib.request.Request(pageAddress, headers=headers)
-    data = urllib.request.urlopen(req).read().decode("utf-8")
+    data = urllib.request.urlopen(req, context=ctx).read().decode("utf-8")
     data = data.replace('\u267a', "REUSE")
     data = data.replace('\u2192', "RARROW")
 

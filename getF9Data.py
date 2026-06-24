@@ -11,6 +11,7 @@ launches = []
 WIKI_PAGES = ["https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2010%E2%80%932019)",
  "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2020%E2%80%932022)",
  "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2023)",
+ "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2024)",
  "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches"];
 NO_COLUMN = -1
 NEXT_ROW = "nextRow"

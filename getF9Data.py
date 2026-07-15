@@ -5,14 +5,18 @@ from datetime import datetime
 import sys
 import certifi
 import ssl
+import csv
+import os
 
 
 launches = []
-WIKI_PAGES = ["https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2010%E2%80%932019)",
- "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2020%E2%80%932022)",
- "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2023)",
- "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2024)",
- "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches"];
+WIKI_PAGES = [
+    #"https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2010%E2%80%932019)",
+    #"https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2020%E2%80%932022)",
+    #"https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2023)",
+    #"https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches_(2024)",
+    "https://en.wikipedia.org/wiki/List_of_Falcon_9_and_Falcon_Heavy_launches"
+];
 NO_COLUMN = -1
 NEXT_ROW = "nextRow"
 FH_SIDE_1_ROW ="fhSide1"
@@ -49,7 +53,7 @@ class MyHTMLParser(HTMLParser):
 
         debugPrint("--- start tag: " + tag)
         if tag=="tr":
-            if self.lastTag=="" and len(attrs)>0 and attrs[0][0]=="id":
+            if self.lastTag=="" and len(attrs)>0 and attrs[0][0]=="id" and attrs[0][1][0] == "F":
                 self.lastTag = tag
                 debugPrint("Start:" + tag)
                 debugPrint(attrs)
@@ -171,6 +175,18 @@ class MyHTMLParser(HTMLParser):
             #else:
             #    print("------------------- Skipped data: " + data.strip())
 
+def get_relative_path_from_command():
+    script_path = sys.argv[0]
+    
+    dir_part = os.path.dirname(script_path)
+    
+    if dir_part:
+        relative_path = dir_part + os.sep
+    else:
+        relative_path = ""
+    
+    return relative_path
+
 numF = 1
 for pageAddress in WIKI_PAGES:
     print("Processing page: " + pageAddress)
@@ -193,8 +209,19 @@ for pageAddress in WIKI_PAGES:
     numF = numF + 1
 #debugPrint(launches)
 
+oldlaunches = []
+with open(get_relative_path_from_command() + "f9olddata.csv", 'r', encoding='utf-8') as olddatafile:
+    csv_reader = csv.reader(olddatafile, delimiter=';')
+    for row in csv_reader:
+        oldlaunches.append(row) 
+
 today = datetime.today().strftime('%Y-%m-%d');
 with codecs.open("f9launches_"+today+".csv", "w", "utf-8") as f:
+    for row in oldlaunches:
+        for col in row:
+            f.write(col.replace("\n", "NEWLINE") + ";")
+        f.write("\n")
+
     for row in launches:
         for col in row:
             f.write(col.replace("\n", "NEWLINE") + ";")

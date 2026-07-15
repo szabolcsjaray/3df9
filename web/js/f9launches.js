@@ -189,7 +189,7 @@ function fillLaunchesArray(launchesStr) {
                 launchArray[1],
                 launchArray[2],
                 launchArray[3].replaceAll("â€‘", "-"),
-                launchArray[4],
+                launchArray[4].replaceAll("LC ‑ 39A", "LC‑39A"),
                 launchArray[5],
                 launchArray[6],
                 launchArray[7],
@@ -334,7 +334,7 @@ function calculateLaunchY(flightNo) {
 }
 
 function calculateAverageY(flightNo) {
-    return baseY - flightNo*scrHeight/28;
+    return baseY - flightNo*scrHeight/29;
 }
 
 function drawLaunchNoAxisMarks() {
@@ -380,7 +380,7 @@ function drawLaunchNoAxisMarks() {
 
 }
 
-const MAX_AVERAGE_REFLIGHT = 20;
+const MAX_AVERAGE_REFLIGHT = 22;
 
 function drawLaunchNoAxisMarksAverage() {
     c.font = ""+ sc(14) + "px Ariana";

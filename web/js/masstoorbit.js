@@ -11,13 +11,13 @@ function extractMasses() {
         let launch = launches[i];
         let pmStr = launch.payloadMass;
         if (pmStr[0]=='~') {
-            pmStr = pmStr.substring(1);
+            pmStr = pmStr.substring(1).trim();
         }
         if (isNum(pmStr[0])) {
             let end = pmStr.indexOf("kg");
             if (end!=-1) {
                 pmStr = pmStr.substring(0, end);
-                pmStr = pmStr.replace(",", "");
+                pmStr = pmStr.replace(",", "").replace("~", "").trim();
                 launch.payLoadMassKg = parseFloat(pmStr);
                 sumMass += launch.payLoadMassKg;
                 if (launch.payLoadMassKg < lightest) {

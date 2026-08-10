@@ -1,1 +1,5 @@
 web/*.csv
+web/f9ls_*.html
+f9ls_*.html
+log_*.log
+

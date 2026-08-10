@@ -112,6 +112,7 @@ function fillAlphaCols(alpha) {
 
 function init() {
     console.log("started.");
+    googleAnalytics();
     fillAlphaCols();
     //scrHeight = window.innerHeight;
     scrHeight = el("canv").height;
@@ -125,6 +126,13 @@ function init() {
     
     fetchData();
     zoomToFit();
+}
+
+function googleAnalytics() {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TF1NSW65C2');
 }
 
 function zoomToFit() {

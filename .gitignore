@@ -2,4 +2,6 @@ web/*.csv
 web/f9ls_*.html
 f9ls_*.html
 log_*.log
-
+stdout.txt
+web/1.html
+f9launches_*.csv

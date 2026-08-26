@@ -18,7 +18,7 @@ var allCol;
 var slCol;
 var diffCol;
 
-const MAX_LANDING = 37.0;
+const MAX_LANDING = 38.0;
 
 const LAUNCHES = 1;
 const REFURB = 2;
